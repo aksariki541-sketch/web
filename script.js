@@ -1,618 +1,576 @@
-/* ============================================================
-   RIKI AKSA — INTERACTIVE SCRIPT
-   Updated: JSON-based icons, per-theme scenes, character modes
-   ============================================================ */
+/* =====================================================================
+   RIKI AKSA — PERSONAL DIGITAL UNIVERSE  (vanilla JS, no libraries)
+   ===================================================================== */
 (function(){
-  'use strict';
+  "use strict";
+  const $  = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const rand  = (a,b)=>a+Math.random()*(b-a);
+  const pick  = a => a[Math.floor(Math.random()*a.length)];
 
-  /* ---------- JSON Data: Icons (all shapes from code, no emojis) ---------- */
-  const ICONS = {
-    code: {
-      viewBox: "0 0 24 24",
-      paths: `<polyline points="16 18 22 12 16 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <polyline points="8 6 2 12 8 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canHover     = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const isTouch      = matchMedia('(hover: none)').matches;
+  if(reduceMotion) document.body.classList.add('reduce');
+
+  /* ---------- LANGUAGE (EN / ID) ---------- */
+  // default = saved choice, else browser language, else English
+  let LANG = localStorage.getItem('ra-lang')
+          || (navigator.language && navigator.language.toLowerCase().indexOf('id') === 0 ? 'id' : 'en');
+  const I18N = {
+    en:{
+      'nav.home':'Home','nav.about':'About','nav.world':'World','nav.school':'School',
+      'hero.hello':"HELLO, I'M",
+      'hero.subtitle':'14 YEARS OLD STUDENT',
+      'hero.desc':'Exploring code, design, technology, AI, and digital creativity.',
+      'hero.welcome':'Welcome to my digital universe.',
+      'hero.enter':'ENTER MY WORLD','hero.about':'ABOUT ME','hero.scroll':'SCROLL',
+      'about.eyebrow':'ABOUT ME',
+      'about.heading':'Just a student<br>with a <span class="accent">curious mind</span>',
+      'about.text':"Hi, I'm <b>Riki Aksa</b>. A 14 years old student from <b>SMP Negeri 4 Sigi</b> who enjoys exploring technology, coding, design, AI, and digital creativity. This isn't a portfolio — it's my little world on the internet. Come look around.",
+      'stat.years':'Years Old','stat.student':'Student','stat.ideas':'Ideas',
+      'world.eyebrow':'MY DIGITAL WORLD',
+      'world.heading':'Things I <span class="accent">love to build</span>',
+      'world.lead':'Tap or hover a card — each one is a little universe of its own.',
+      'card.coding.t':'CODING','card.coding.d':'Turning ideas into things that actually work.',
+      'card.website.t':'WEBSITE','card.website.d':'Building places on the internet worth visiting.',
+      'card.design.t':'DESIGN','card.design.d':'Making things feel clean, smooth and alive.',
+      'card.ai.t':'AI','card.ai.d':'Playing with intelligence that learns and creates.',
+      'card.tech.t':'TECHNOLOGY','card.tech.d':'The tools that make the impossible feel normal.',
+      'card.experiments.t':'DIGITAL EXPERIMENTS','card.experiments.d':'Small weird projects that teach me a lot.',
+      'school.eyebrow':'PART OF THE JOURNEY',
+      'school.text':'One of the places that is part of my journey. A small piece of where this digital universe began.',
+      'school.btn':'VISIT SCHOOL WEBSITE',
+      'footer.text':'Built with curiosity by <b>Riki Aksa</b> · SMP Negeri 4 Sigi · Sigi, Sulawesi Tengah, Indonesia',
+      'loader.init':'INITIALIZING DIGITAL UNIVERSE',
+      'tip.mono':'Mono','tip.green':'Green','tip.blue':'Blue','tip.red':'Red'
     },
-    web: {
-      viewBox: "0 0 24 24",
-      paths: `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-              <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="2"/>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2" fill="none"/>`
-    },
-    design: {
-      viewBox: "0 0 24 24",
-      paths: `<path d="M12 19l7-7 3 3-7 7-3-3z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 2l7.586 7.586" stroke="currentColor" stroke-width="2" fill="none"/>
-              <circle cx="11" cy="11" r="2" stroke="currentColor" stroke-width="2" fill="none"/>`
-    },
-    ai: {
-      viewBox: "0 0 24 24",
-      paths: `<rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
-              <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
-              <circle cx="15" cy="9" r="1.5" fill="currentColor"/>
-              <path d="M9 15h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <path d="M12 3v2M12 19v2M3 12h1M20 12h1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`
-    },
-    idea: {
-      viewBox: "0 0 24 24",
-      paths: `<path d="M9 18h6M10 22h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
-    },
-    flask: {
-      viewBox: "0 0 24 24",
-      paths: `<path d="M9 3h6M10 3v6L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M7 14h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`
+    id:{
+      'nav.home':'Beranda','nav.about':'Tentang','nav.world':'Dunia','nav.school':'Sekolah',
+      'hero.hello':'HALO, SAYA',
+      'hero.subtitle':'SISWA BERUSIA 14 TAHUN',
+      'hero.desc':'Menjelajahi kode, desain, teknologi, AI, dan kreativitas digital.',
+      'hero.welcome':'Selamat datang di alam semesta digital saya.',
+      'hero.enter':'MASUK KE DUNIAKU','hero.about':'TENTANG SAYA','hero.scroll':'GULIR',
+      'about.eyebrow':'TENTANG SAYA',
+      'about.heading':'Hanya seorang pelajar<br>dengan <span class="accent">pikiran yang penasaran</span>',
+      'about.text':'Hai, saya <b>Riki Aksa</b>. Pelajar berusia 14 tahun dari <b>SMP Negeri 4 Sigi</b> yang suka menjelajahi teknologi, coding, desain, AI, dan kreativitas digital. Ini bukan portofolio — ini dunia kecil saya di internet. Mari lihat-lihat.',
+      'stat.years':'Tahun','stat.student':'Siswa','stat.ideas':'Ide',
+      'world.eyebrow':'DUNIA DIGITAL SAYA',
+      'world.heading':'Hal yang saya <span class="accent">suka buat</span>',
+      'world.lead':'Ketuk atau arahkan kursor ke kartu — setiap kartu adalah alam semestanya sendiri.',
+      'card.coding.t':'KODING','card.coding.d':'Mengubah ide menjadi sesuatu yang benar-benar berfungsi.',
+      'card.website.t':'WEBSITE','card.website.d':'Membangun tempat di internet yang layak dikunjungi.',
+      'card.design.t':'DESAIN','card.design.d':'Membuat sesuatu terasa rapi, halus, dan hidup.',
+      'card.ai.t':'AI','card.ai.d':'Bermain dengan kecerdasan yang belajar dan mencipta.',
+      'card.tech.t':'TEKNOLOGI','card.tech.d':'Alat yang membuat yang mustahil terasa biasa.',
+      'card.experiments.t':'EKSPERIMEN DIGITAL','card.experiments.d':'Proyek aneh kecil yang banyak mengajari saya.',
+      'school.eyebrow':'BAGIAN DARI PERJALANAN',
+      'school.text':'Salah satu tempat yang menjadi bagian perjalanan saya. Sepenggal kecil awal mula alam semesta digital ini.',
+      'school.btn':'KUNJUNGI WEBSITE SEKOLAH',
+      'footer.text':'Dibuat dengan rasa ingin tahu oleh <b>Riki Aksa</b> · SMP Negeri 4 Sigi · Sigi, Sulawesi Tengah, Indonesia',
+      'loader.init':'MENGINISIALISASI ALAM SEMESTA DIGITAL',
+      'tip.mono':'Mono','tip.green':'Hijau','tip.blue':'Biru','tip.red':'Merah'
     }
   };
-
-  /* ---------- JSON Data: World items (rendered dynamically, no emojis) ---------- */
-  const WORLD_ITEMS = [
-    {icon:'code', name:'Coding', desc:'Writing lines of logic and watching them come alive in the browser.'},
-    {icon:'web', name:'Websites', desc:'Designing and building little places on the internet that feel alive.'},
-    {icon:'design', name:'Design', desc:'Playing with colors, layouts, typography, and visual stories.'},
-    {icon:'ai', name:'AI', desc:'Experimenting with artificial intelligence and what it can create.'},
-    {icon:'idea', name:'Technology', desc:'Curious about new tools, gadgets, and how the digital world evolves.'},
-    {icon:'flask', name:'Experiments', desc:'Random digital projects, creative tinkering, and happy accidents.'}
-  ];
-
-  /* ---------- Theme & Scene Config ---------- */
-  const THEMES = ['bw','green','blue','red','orange'];
-  const THEME_COLOR_MAP = {
-    bw:'#ffffff',
-    green:'#4ade80',
-    blue:'#60a5fa',
-    red:'#f87171',
-    orange:'#fb923c'
+  const BUBBLES = {
+    en:{ click:["Hey!","Welcome!","Let's explore!","Nice to see you!","Cool!","Stay curious!"],
+         green:["Nice weather!","Let's enjoy the grass!","Feels peaceful.","Grass mode!"],
+         blue:["Just keep swimming.","Water mode activated.","Relax...","So cool."],
+         hot:["Too hot...","Need water!","Where is the water?!","Ahh, it burns!"],
+         relief:["Ahh... cool!","Finally!","Much better!"],
+         swim:["Much better!","Just keep swimming.","Cool!"] },
+    id:{ click:["Hai!","Selamat datang!","Ayo jelajahi!","Senang bertemu!","Keren!","Tetap penasaran!"],
+         green:["Cuaca bagus!","Nikmati rumputnya!","Terasa damai.","Mode rumput!"],
+         blue:["Terus berenang.","Mode air aktif.","Santai...","Sejuk sekali."],
+         hot:["Panas banget...","Butuh air!","Di mana airnya?!","Aduh, panas!"],
+         relief:["Ahh... sejuk!","Akhirnya!","Jauh lebih baik!"],
+         swim:["Jauh lebih baik!","Terus berenang.","Keren!"] }
   };
-  // Moods for each theme (mouth shape, eye size, speed)
-  const CHAR_MOODS = {
-    bw:    {mouth:'M26 28 Q30 30 34 28', eyes:2.2, speedMod:1,   greetings:['Hey.','Welcome.','Cool vibes.','Stay a while.']},
-    green: {mouth:'M25 27 Q30 33 35 27', eyes:2.4, speedMod:1.3, greetings:['Hey!','Nice to see you!','Let\'s explore!','Yo!']},
-    blue:  {mouth:'M26 28.5 Q30 29 34 28.5', eyes:2.0, speedMod:0.7, greetings:['Hey.','Welcome.','Take your time.','Just swimming~']},
-    red:   {mouth:'M27 29 Q30 32 33 29', eyes:2.3, speedMod:0.5, greetings:['Panas ya!','Haus...','Hi!','Cari es yuk!']},
-    orange:{mouth:'M27 29 Q30 32 33 29', eyes:2.3, speedMod:0.5, greetings:['Panas banget!','Wah!','Hey!','Matahari terik!']}
+  function B(key){ return pick(BUBBLES[LANG][key]); }
+  function setLang(lang){
+    LANG = lang;
+    localStorage.setItem('ra-lang', lang);
+    document.documentElement.setAttribute('lang', lang);
+    $$('[data-i18n]').forEach(el=>{
+      const v = I18N[lang][el.getAttribute('data-i18n')];
+      if(v !== undefined) el.innerHTML = v;
+    });
+    $$('.lang-toggle span[data-lang]').forEach(s=>s.classList.toggle('on', s.dataset.lang===lang));
+  }
+
+  /* ---------- THEME SYSTEM (worlds) ---------- */
+  const THEMES = ['mono','green','blue','red'];
+  let THEME_TOKEN = 0;            // bumped on every theme change (cancels scripts)
+  const saved = localStorage.getItem('ra-theme');
+  const startTheme = THEMES.includes(saved) ? saved : 'mono';
+
+  function setTheme(name, opts){
+    opts = opts || {};
+    document.documentElement.setAttribute('data-theme', name);
+    if(opts.save !== false) localStorage.setItem('ra-theme', name);
+    THEME_TOKEN++;
+    onThemeChange(name, opts);
+  }
+
+  function onThemeChange(name, opts){
+    // dock active state
+    $$('.theme-dot').forEach(d=>d.classList.toggle('active', d.dataset.theme===name));
+    document.querySelector('meta[name=theme-color]').setAttribute('content',
+      getComputedStyle(document.body).getPropertyValue('--bg-0').trim());
+    buildEnv(name);                 // regenerate world particles
+    updateParticleColor();
+    if(opts && opts.scripting) return;   // story controls the character itself
+    // leaving the hot world cancels any running hot->water story
+    if(char.storyToken && name!=='red') char.storyToken = 0;
+    // neutral (non-story) behaviour per world
+    if(name==='mono'){ setMode('patrol'); setExpr('cool'); }
+    else if(name==='green'){ setMode('green'); setExpr('happy'); }
+    else if(name==='blue'){ setMode('swim'); setExpr('relief'); }
+    else if(name==='red'){ startHotStory(); }
+  }
+
+  /* ---------- CHARACTER STATE MACHINE ---------- */
+  const charEl = $('#character');
+  const charY  = $('#charY');
+  const bubble = $('#charBubble');
+  const stage  = $('#stage');
+
+  const char = {
+    x: 60, dir: 1, speed: 0.7,
+    minX: 10, maxX: 600, width: 88,
+    mode: 'patrol', motion: 'idle', expr: 'cool',
+    press: false, transientUntil: 0,
+    gotoTarget: 0, gotoSpeed: 1, gotoToken: 0, _resolve: null,
+    storyToken: 0,
+    edgePause: 0
   };
-  const isMobile = window.matchMedia('(max-width:900px)').matches || ('ontouchstart' in window);
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const baseSpeed = isMobile ? 0.5 : 0.7;
 
-  /* ---------- Elements ---------- */
-  const $ = s => document.querySelector(s);
-  const $$ = s => document.querySelectorAll(s);
-  const body = document.body;
-  const loader = $('#loader');
-  const navbar = $('#navbar');
-  const scrollProgress = $('#scrollProgress');
-  const cursorDot = $('#cursorDot');
-  const cursorRing = $('#cursorRing');
-  const hamburger = $('#hamburger');
-  const mobileMenu = $('#mobileMenu');
-  const character = $('#character');
-  const charBubble = $('#charBubble');
-  const charMouth = () => document.querySelector('.char-mouth');
-  const scene = $('#scene');
-  const particlesCanvas = $('#particles-canvas');
-  const pctx = particlesCanvas.getContext('2d');
-  const worldGrid = $('#worldGrid');
-
-  /* ---------- Helper: Render icon from JSON ---------- */
-  function renderIcon(name, size=40){
-    const ic = ICONS[name];
-    if(!ic) return '';
-    return `<svg class="${name === 'world' ? 'world-icon' : ''}" width="${size}" height="${size}" viewBox="${ic.viewBox}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic.paths}</svg>`;
+  function paint(){
+    charEl.className = 'character ' + char.motion + (char.press?' press':'') + ' expr-' + char.expr;
+  }
+  function setMotion(m){ char.motion = m; paint(); }
+  function setExpr(e){ char.expr = e; paint(); }
+  function setMode(m){ char.mode = m; }
+  // transient overrides loop motion (e.g. celebrate on click)
+  function transientMotion(m, ms){
+    char.motion = m; paint();
+    char.transientUntil = performance.now() + ms;
+  }
+  function setMotionIfFree(m){
+    if(performance.now() < char.transientUntil) return;
+    char.motion = m; paint();
   }
 
-  /* ---------- Render World Cards from JSON ---------- */
-  function renderWorld(){
-    worldGrid.innerHTML = WORLD_ITEMS.map((item,i) => `
-      <div class="world-card reveal" data-world style="transition-delay:${i*0.08}s">
-        <div class="world-icon">${renderIcon(item.icon, 40)}</div>
-        <div class="world-name">${item.name}</div>
-        <div class="world-desc">${item.desc}</div>
-      </div>
-    `).join('');
-    // bind hover events
-    $$('[data-world]').forEach(card=>{
-      card.addEventListener('mousemove',e=>{
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx',(e.clientX-r.left)+'px');
-        card.style.setProperty('--my',(e.clientY-r.top)+'px');
-      });
+  function measure(){
+    char.width = charEl.offsetWidth || 88;
+    char.maxX = Math.max(char.minX, window.innerWidth - char.width - 10);
+    if(char.x > char.maxX) char.x = char.maxX;
+  }
+
+  /* ---- bubble text (bilingual via B()) ---- */
+  let bubbleTimer = null;
+  function showBubble(text){
+    bubble.textContent = text;
+    bubble.classList.add('show');
+    clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(()=>bubble.classList.remove('show'), 2200);
+  }
+
+  /* ---- main character loop ---- */
+  let last = performance.now();
+  function loop(now){
+    const dt = Math.min(2.4, (now - last) / 16.67); // normalized to ~60fps frames
+    last = now;
+    step(dt);
+    applyTransform();
+    drawCursorTrail();
+    requestAnimationFrame(loop);
+  }
+
+  function applyTransform(){
+    const flip = char.dir < 0 ? -1 : 1;
+    charEl.style.transform = 'translateX(' + char.x + 'px) scaleX(' + flip + ')';
+  }
+
+  function step(dt){
+    switch(char.mode){
+      case 'patrol': patrol(dt); break;
+      case 'green':  green(dt);  break;
+      case 'swim':   swimMode(dt); break;
+      case 'hot':    setMotionIfFree('hot'); break;          // standing, fanning
+      case 'look':   setMotionIfFree('look'); break;
+      case 'sit':    setMotionIfFree('sit'); break;
+      case 'idle':   setMotionIfFree('idle'); break;
+      case 'blueWait': setMotionIfFree('idle'); break;
+      case 'goto':   gotoMode(dt); break;
+    }
+  }
+
+  function walker(dt, speed){
+    char.x += char.dir * speed * dt;
+    if(char.x >= char.maxX){ char.x = char.maxX; char.dir = -1; }
+    if(char.x <= char.minX){ char.x = char.minX; char.dir =  1; }
+    setMotionIfFree(speed > 1.5 ? 'run' : 'walk');
+  }
+  function patrol(dt){
+    if(char.edgePause > 0){ char.edgePause -= dt; setMotionIfFree('idle'); return; }
+    walker(dt, char.speed);
+    if(Math.random() < 0.004) char.edgePause = rand(40, 90); // occasional pause
+  }
+  function green(dt){
+    walker(dt, char.speed * 0.8);
+    if(Math.random() < 0.0016){
+      // little moment: sit / look / jump
+      const r = Math.random();
+      if(r < 0.4){ setMode('sit'); showBubble(B('green')); setTimeout(()=>{ if(char.mode==='sit') setMode('green'); }, 1600); }
+      else { setMode('look'); setTimeout(()=>{ if(char.mode==='look') setMode('green'); }, 1500); }
+    }
+  }
+  function swimMode(dt){
+    char.x += char.dir * 0.3 * dt;
+    if(char.x >= char.maxX || char.x <= char.minX) char.dir *= -1;
+    setMotionIfFree('swim');
+    if(Math.random() < 0.02) spawnSplashBubble();
+  }
+
+  function gotoMode(dt){
+    const dx = char.gotoTarget - char.x;
+    const stepLen = char.gotoSpeed * dt;
+    if(char.gotoToken !== THEME_TOKEN){ // theme changed mid-run -> abort
+      char.mode = 'idle'; if(char._resolve){const r=char._resolve;char._resolve=null;r();} return;
+    }
+    if(Math.abs(dx) <= stepLen){
+      char.x = char.gotoTarget; char.mode = 'idle';
+      if(char._resolve){const r=char._resolve;char._resolve=null;r();}
+      return;
+    }
+    char.dir = dx > 0 ? 1 : -1;
+    char.x += char.dir * stepLen;
+    setMotionIfFree(char.gotoSpeed > 1.5 ? 'run' : 'walk');
+  }
+  function moveTo(targetX, speed){
+    return new Promise(resolve=>{
+      char.mode = 'goto';
+      char.gotoTarget = clamp(targetX, char.minX, char.maxX);
+      char.gotoSpeed = speed;
+      char.gotoToken = THEME_TOKEN;
+      char._resolve = resolve;
     });
   }
+  const wait = ms => new Promise(r=>setTimeout(r, ms));
 
-  /* ---------- Build Scene per theme ---------- */
-  function buildScene(theme){
-    scene.innerHTML = '';
-    const ground = document.createElement('div');
-    ground.className = 'scene-ground';
-    scene.appendChild(ground);
-
-    if(theme === 'bw'){
-      // Normal: simple line
-      const line = document.createElement('div');
-      line.className = 'scene-line';
-      scene.appendChild(line);
-    }
-    else if(theme === 'green'){
-      // Grass scene
-      const line = document.createElement('div');
-      line.className = 'scene-line';
-      scene.appendChild(line);
-      const grass = document.createElement('div');
-      grass.className = 'scene-grass';
-      const bladeCount = isMobile ? 20 : 45;
-      for(let i=0;i<bladeCount;i++){
-        const blade = document.createElement('div');
-        blade.className = 'grass-blade';
-        blade.style.height = (8 + Math.random()*18)+'px';
-        blade.style.animationDelay = (Math.random()*3)+'s';
-        blade.style.opacity = 0.4 + Math.random()*0.5;
-        grass.appendChild(blade);
-      }
-      scene.appendChild(grass);
-    }
-    else if(theme === 'blue'){
-      // Water scene
-      const water = document.createElement('div');
-      water.className = 'scene-water';
-      // Wave
-      const wave = document.createElement('div');
-      wave.className = 'water-wave';
-      wave.innerHTML = `<svg viewBox="0 0 1200 20" preserveAspectRatio="none">
-        <path d="M0 10 Q 150 0 300 10 T 600 10 T 900 10 T 1200 10" stroke="currentColor" stroke-width="2" fill="none" opacity=".6">
-          <animate attributeName="d" dur="4s" repeatCount="indefinite" values="
-            M0 10 Q 150 0 300 10 T 600 10 T 900 10 T 1200 10;
-            M0 10 Q 150 20 300 10 T 600 10 T 900 10 T 1200 10;
-            M0 10 Q 150 0 300 10 T 600 10 T 900 10 T 1200 10
-          "/>
-        </path>
-      </svg>`;
-      water.appendChild(wave);
-      // Bubbles
-      const bubbleCount = isMobile ? 5 : 10;
-      for(let i=0;i<bubbleCount;i++){
-        const b = document.createElement('div');
-        b.className = 'water-bubble';
-        const size = 3 + Math.random()*6;
-        b.style.width = size+'px';
-        b.style.height = size+'px';
-        b.style.left = (Math.random()*100)+'%';
-        b.style.animationDelay = (Math.random()*4)+'s';
-        b.style.animationDuration = (3 + Math.random()*3)+'s';
-        water.appendChild(b);
-      }
-      scene.appendChild(water);
-    }
-    else if(theme === 'red' || theme === 'orange'){
-      // Hot scene
-      const sun = document.createElement('div');
-      sun.className = 'scene-sun';
-      scene.appendChild(sun);
-      const heat = document.createElement('div');
-      heat.className = 'scene-heat';
-      scene.appendChild(heat);
-      // Cracked ground lines
-      for(let i=0;i<8;i++){
-        const c = document.createElement('div');
-        c.className = 'crack';
-        c.style.left = (Math.random()*90)+'%';
-        c.style.width = (30 + Math.random()*80)+'px';
-        c.style.transform = `rotate(${-15 + Math.random()*30}deg)`;
-        scene.appendChild(c);
-      }
-      const line = document.createElement('div');
-      line.className = 'scene-line';
-      scene.appendChild(line);
-    }
+  /* ---- HOT -> WATER STORY (red) ---- */
+  function startHotStory(){
+    if(char.storyToken) return;            // already running
+    if(isTouch && reduceMotion) { /* still run, just lighter */ }
+    char.storyToken = Date.now();
+    runHotStory(char.storyToken);
+  }
+  async function runHotStory(token){
+    const stale = ()=> token !== char.storyToken;
+    setMode('hot'); setExpr('hot');
+    await wait(1400); if(stale()) return;
+    showBubble(B('hot'));
+    await wait(1900); if(stale()) return;
+    showBubble(B('hot'));
+    setMode('look');                       // looks toward the BLUE button
+    await wait(1100); if(stale()) return;
+    setMode('run');                        // RUN to the BLUE button
+    const tx = blueTargetX();
+    await moveTo(tx, 2.6); if(stale()) return;
+    setMode('idle');
+    pressAnim();                           // reaches up & presses BLUE
+    await wait(420); if(stale()) return;
+    // trigger the world change (story drives the character afterwards)
+    setTheme('blue', { save:true, scripting:true });
+    await wait(500); if(stale()) return;
+    setMode('blueWait'); setExpr('relief');
+    showBubble(B('relief'));
+    await wait(650); if(stale()) return;
+    enterWater(token);
+  }
+  function blueTargetX(){
+    const r = $('#theme-blue').getBoundingClientRect();
+    const sr = stage.getBoundingClientRect();
+    return (r.left + r.width/2) - sr.left - char.width/2;
+  }
+  function pressAnim(){
+    char.press = true; paint();
+    setTimeout(()=>{ char.press = false; paint(); }, 420);
+  }
+  function enterWater(token){
+    if(token !== char.storyToken) return;
+    splash();                              // gentle ripple, no jump
+    setMode('swim'); setExpr('relief');
+    showBubble(B('swim'));
+    char.storyToken = 0;
+  }
+  function splash(){
+    const s = document.createElement('div');
+    s.className = 'splash';
+    s.style.left = (char.x + char.width/2) + 'px';
+    stage.appendChild(s);
+    setTimeout(()=>s.remove(), 800);
+    for(let i=0;i<6;i++) setTimeout(spawnSplashBubble, i*70);
+  }
+  function spawnSplashBubble(big){
+    const b = document.createElement('div');
+    b.className = 'water-bubble';
+    b.style.left = (char.x + rand(10,char.width-10)) + 'px';
+    b.style.bottom = '0';
+    if(big){ b.style.width = b.style.height = '12px'; }
+    b.style.animationDuration = rand(1.4, 2.6) + 's';
+    $('#envWater').appendChild(b);
+    setTimeout(()=>b.remove(), 2800);
   }
 
-  /* ---------- Theme Application ---------- */
-  function applyTheme(theme){
-    if(!THEMES.includes(theme)) theme = 'bw';
-    body.setAttribute('data-theme', theme);
-    document.documentElement.style.setProperty('--accent', THEME_COLOR_MAP[theme]);
-    // character color
-    character.style.color = THEME_COLOR_MAP[theme];
-    // mood
-    const mood = CHAR_MOODS[theme];
-    const cm = charMouth();
-    if(cm) cm.setAttribute('d', mood.mouth);
-    const el = document.querySelector('.char-eye-l circle');
-    const er = document.querySelector('.char-eye-r circle');
-    if(el) el.setAttribute('r', mood.eyes);
-    if(er) er.setAttribute('r', mood.eyes);
-    // character mode
-    setCharMode(theme, mood.speedMod);
-    // build scene
-    buildScene(theme);
-    // update active buttons
-    $$('.theme-orb').forEach(b=>{
-      b.classList.toggle('active', b.dataset.theme===theme);
-    });
-    // save to localStorage
-    try{ localStorage.setItem('riki_theme', theme); }catch(e){}
-    // update particles
-    if(particles) particles.forEach(p=>p.color=THEME_COLOR_MAP[theme]);
-  }
-  function initTheme(){
-    let saved='bw';
-    try{ saved = localStorage.getItem('riki_theme') || 'bw'; }catch(e){}
-    applyTheme(saved);
-  }
-
-  /* ---------- Theme Switcher Events ---------- */
-  $$('.theme-orb').forEach(btn=>{
-    btn.addEventListener('click', e=>{
-      e.stopPropagation();
-      applyTheme(btn.dataset.theme);
-      createRipple(e.clientX||window.innerWidth/2, e.clientY||window.innerHeight/2);
-    });
+  /* ---- clicking the character ---- */
+  charEl.addEventListener('click', ()=>{
+    const key = char.mode==='swim' ? 'blue'
+              : (document.documentElement.dataset.theme==='green') ? 'green'
+              : (char.expr==='hot') ? 'hot' : 'click';
+    showBubble(B(key));
+    transientMotion('celebrate', 650);
   });
 
-  /* ---------- Loader ---------- */
-  function hideLoader(){
-    setTimeout(()=>loader.classList.add('hidden'), 1900);
-  }
-
-  /* ---------- Custom Cursor ---------- */
-  let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
-  let ringX = mouseX, ringY = mouseY;
-  let trails = [];
-  if(!isMobile && !prefersReducedMotion){
-    document.addEventListener('mousemove', e=>{
-      mouseX = e.clientX; mouseY = e.clientY;
-      cursorDot.style.transform = `translate(${mouseX}px,${mouseY}px) translate(-50%,-50%)`;
-      if(Math.random()<.3) addTrail(mouseX, mouseY);
-    });
-    function animateCursor(){
-      ringX += (mouseX-ringX)*.18;
-      ringY += (mouseY-ringY)*.18;
-      cursorRing.style.transform = `translate(${ringX}px,${ringY}px) translate(-50%,-50%)`;
-      requestAnimationFrame(animateCursor);
-    }
-    animateCursor();
-    $$('a,button,.world-card,.stat-card,.theme-orb,.character').forEach(el=>{
-      el.addEventListener('mouseenter',()=>cursorRing.classList.add('hover'));
-      el.addEventListener('mouseleave',()=>cursorRing.classList.remove('hover'));
-    });
-  }
-  function addTrail(x,y){
-    const t = document.createElement('div');
-    t.className='cursor-trail';
-    t.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%)`;
-    document.body.appendChild(t);
-    const trail = {el:t,x,y,life:1};
-    trails.push(trail);
-    if(trails.length>18){const old=trails.shift();old.el.remove();}
-    requestAnimationFrame(()=>animateTrail(trail));
-  }
-  function animateTrail(t){
-    t.life-=.06;
-    if(t.life<=0){t.el.remove();return;}
-    t.el.style.opacity = t.life*.5;
-    t.el.style.transform = `translate(${t.x}px,${t.y}px) translate(-50%,-50%) scale(${t.life})`;
-    requestAnimationFrame(()=>animateTrail(t));
-  }
-
-  /* ---------- Magnetic Buttons ---------- */
-  if(!isMobile){
-    $$('[data-magnetic]').forEach(btn=>{
-      btn.addEventListener('mousemove', e=>{
-        const r = btn.getBoundingClientRect();
-        const x = e.clientX - r.left - r.width/2;
-        const y = e.clientY - r.top - r.height/2;
-        btn.style.transform = `translate(${x*.25}px,${y*.25}px) translateY(-2px)`;
-      });
-      btn.addEventListener('mouseleave',()=>{btn.style.transform='';});
-    });
-  }
-
-  /* ---------- Click Ripple ---------- */
-  document.addEventListener('click', e=>{createRipple(e.clientX, e.clientY);});
-  function createRipple(x,y){
-    const r = document.createElement('div');
-    r.className='ripple';
-    r.style.left=x+'px';r.style.top=y+'px';r.style.width='20px';r.style.height='20px';
-    document.body.appendChild(r);
-    setTimeout(()=>r.remove(),750);
-  }
-
-  /* ---------- Navbar Scroll ---------- */
-  window.addEventListener('scroll',()=>{
-    navbar.classList.toggle('scrolled', window.scrollY>40);
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    scrollProgress.style.width = h>0 ? (window.scrollY/h*100)+'%' : '0%';
-  },{passive:true});
-
-  /* ---------- Mobile Menu ---------- */
-  hamburger.addEventListener('click',()=>{
-    hamburger.classList.toggle('open');
-    mobileMenu.classList.toggle('open');
-    document.body.style.overflow = mobileMenu.classList.contains('open')?'hidden':'';
-  });
-  $$('.mobile-link').forEach(el=>{
-    el.addEventListener('click',()=>{
-      hamburger.classList.remove('open');
-      mobileMenu.classList.remove('open');
-      document.body.style.overflow='';
-    });
-  });
-
-  /* ---------- Reveal on Scroll ---------- */
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(en=>{
-      if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}
-    });
-  },{threshold:.12});
-  function observeReveals(){$$('.reveal').forEach(el=>io.observe(el));}
-
-  /* ---------- Count Up ---------- */
-  function countUp(el, target, duration=1600){
-    const start = performance.now();
-    function tick(now){
-      const p = Math.min((now-start)/duration,1);
-      const eased = 1-Math.pow(1-p,3);
-      el.textContent = Math.floor(eased*target);
-      if(p<1) requestAnimationFrame(tick);
-      else el.textContent = target;
-    }
-    requestAnimationFrame(tick);
-  }
-  const countIO = new IntersectionObserver(entries=>{
-    entries.forEach(en=>{
-      if(en.isIntersecting){
-        const n = en.target.dataset.count;
-        if(n) countUp(en.target, parseInt(n,10));
-        countIO.unobserve(en.target);
+  /* ---------- ENVIRONMENTS (world particles) ---------- */
+  const envGrass = $('#envGrass'), envWater = $('#envWater'), envHeat = $('#envHeat');
+  function buildEnv(name){
+    // clear dynamic bits
+    envGrass.querySelectorAll('.leaf').forEach(e=>e.remove());
+    envWater.querySelectorAll('.water-bubble').forEach(e=>e.remove());
+    envHeat.querySelectorAll('.ember').forEach(e=>e.remove());
+    if(reduceMotion) return;
+    const base = isTouch ? 10 : 22;
+    if(name==='green'){
+      // grass blades
+      const gb = $('#grassBlades'); gb.innerHTML='';
+      const n = isTouch ? 26 : 48;
+      for(let i=0;i<n;i++){
+        const b=document.createElement('div'); b.className='grass-blade';
+        b.style.left = (i/n*100 + rand(-1,1)) + '%';
+        b.style.height = rand(22,46)+'px';
+        b.style.animationDelay = rand(0,3.5)+'s';
+        b.style.animationDuration = rand(2.6,4.4)+'s';
+        gb.appendChild(b);
       }
-    });
-  },{threshold:.5});
-
-  /* ---------- Typing Effect ---------- */
-  const typingPhrases = [
-    "Building ideas in the digital world.",
-    "Code · Design · Create.",
-    "Learning one line at a time."
-  ];
-  function typeWriter(el, phrases, speed=55, pause=1800){
-    let pi=0, ci=0, deleting=false;
-    function tick(){
-      const phrase = phrases[pi];
-      if(!deleting){
-        el.textContent = phrase.slice(0,++ci);
-        if(ci===phrase.length){deleting=true;setTimeout(tick,pause);return;}
-      }else{
-        el.textContent = phrase.slice(0,--ci);
-        if(ci===0){deleting=false;pi=(pi+1)%phrases.length;}
-      }
-      setTimeout(tick, deleting?speed/2:speed);
+      // falling leaves
+      for(let i=0;i<base;i++) spawnLeaf();
+    } else if(name==='blue'){
+      for(let i=0;i<base;i++) spawnWaterBubble();
+    } else if(name==='red'){
+      for(let i=0;i<base;i++) spawnEmber();
     }
-    setTimeout(tick,2400);
+  }
+  function spawnLeaf(){
+    const l=document.createElement('div'); l.className='leaf';
+    l.style.left = rand(0,100)+'%';
+    l.style.background = pick(['var(--accent-2)','var(--accent)','#bbf7d0','#fde68a']);
+    l.style.setProperty('--dx', rand(-50,50)+'px');
+    l.style.animationDuration = rand(6,12)+'s';
+    l.style.animationDelay = rand(0,6)+'s';
+    l.style.opacity = rand(.5,.9);
+    envGrass.appendChild(l);
+    setTimeout(()=>l.remove(), 14000);
+  }
+  function spawnWaterBubble(){
+    const b=document.createElement('div'); b.className='water-bubble';
+    b.style.left = rand(0,100)+'%';
+    b.style.animationDuration = rand(2.2,4.5)+'s';
+    b.style.animationDelay = rand(0,3)+'s';
+    envWater.appendChild(b);
+    setTimeout(()=>b.remove(), 7000);
+  }
+  function spawnEmber(){
+    const e=document.createElement('div'); e.className='ember';
+    e.style.left = rand(0,100)+'%';
+    e.style.setProperty('--dx', rand(-30,30)+'px');
+    e.style.animationDuration = rand(3.5,7)+'s';
+    e.style.animationDelay = rand(0,4)+'s';
+    envHeat.appendChild(e);
+    setTimeout(()=>e.remove(), 8000);
   }
 
-  /* ---------- Particles ---------- */
-  let particles = [];
-  let canvasW=0, canvasH=0;
-  function resizeCanvas(){
-    const dpr = Math.min(window.devicePixelRatio||1,2);
-    canvasW = window.innerWidth; canvasH = window.innerHeight;
-    particlesCanvas.width = canvasW*dpr;
-    particlesCanvas.height = canvasH*dpr;
-    particlesCanvas.style.width=canvasW+'px';
-    particlesCanvas.style.height=canvasH+'px';
-    pctx.setTransform(dpr,0,0,dpr,0,0);
+  /* ---------- AMBIENT PARTICLE CANVAS ---------- */
+  const fx = $('#fx');
+  const ctx = fx.getContext('2d');
+  let particles = [], pColor = 'rgba(255,255,255,.5)';
+  function updateParticleColor(){
+    pColor = getComputedStyle(document.body).getPropertyValue('--particle').trim() || 'rgba(255,255,255,.5)';
+  }
+  function sizeCanvas(){
+    fx.width = window.innerWidth; fx.height = window.innerHeight;
   }
   function initParticles(){
-    resizeCanvas();
-    const count = isMobile?22:55;
+    const n = reduceMotion ? 0 : (isTouch ? 26 : 60);
     particles = [];
-    for(let i=0;i<count;i++){
+    for(let i=0;i<n;i++){
       particles.push({
-        x:Math.random()*canvasW,y:Math.random()*canvasH,
-        vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
-        r:Math.random()*1.8+.5,a:Math.random()*.5+.2,
-        color: THEME_COLOR_MAP[body.getAttribute('data-theme')] || '#fff'
+        x: Math.random()*fx.width, y: Math.random()*fx.height,
+        r: rand(0.6,2.2), vy: rand(-0.25,-0.6), vx: rand(-0.15,0.15),
+        a: rand(0.15,0.6), ph: rand(0,6.28)
       });
     }
   }
   function drawParticles(){
-    if(prefersReducedMotion) return;
-    pctx.clearRect(0,0,canvasW,canvasH);
-    for(let i=0;i<particles.length;i++){
-      const p = particles[i];
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0||p.x>canvasW) p.vx*=-1;
-      if(p.y<0||p.y>canvasH) p.vy*=-1;
-      if(!isMobile){
-        const dx=mouseX-p.x, dy=mouseY-p.y, d=Math.sqrt(dx*dx+dy*dy);
-        if(d<150){p.vx+=dx/d*0.005;p.vy+=dy/d*0.005;}
-        p.vx*=.99;p.vy*=.99;
-      }
-      pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      pctx.fillStyle = hexToRgba(p.color,p.a);
-      pctx.shadowBlur=8;pctx.shadowColor=p.color;pctx.fill();
+    if(reduceMotion || !particles.length) return;
+    ctx.clearRect(0,0,fx.width,fx.height);
+    for(const p of particles){
+      p.y += p.vy; p.x += p.vx + Math.sin(p.ph += 0.01)*0.15;
+      if(p.y < -10){ p.y = fx.height+10; p.x = Math.random()*fx.width; }
+      if(p.x < -10) p.x = fx.width+10; if(p.x > fx.width+10) p.x = -10;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.28);
+      ctx.fillStyle = pColor; ctx.globalAlpha = p.a; ctx.fill();
     }
-    pctx.shadowBlur=0;
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const a=particles[i],b=particles[j];
-        const dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;
-        if(d<12000){
-          pctx.beginPath();pctx.moveTo(a.x,a.y);pctx.lineTo(b.x,b.y);
-          pctx.strokeStyle=hexToRgba(a.color,(1-d/12000)*0.12);
-          pctx.lineWidth=.6;pctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(drawParticles);
-  }
-  function hexToRgba(hex,a){
-    const h=hex.replace('#','');
-    const bigint=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);
-    const r=(bigint>>16)&255,g=(bigint>>8)&255,b=bigint&255;
-    return `rgba(${r},${g},${b},${a})`;
+    ctx.globalAlpha = 1;
   }
 
-  /* ---------- Parallax Orbs ---------- */
-  function parallaxOrbs(){
-    if(prefersReducedMotion||isMobile) return;
-    const orb1=$('#orb1'),orb2=$('#orb2');
-    document.addEventListener('mousemove',e=>{
-      const x=(e.clientX/window.innerWidth-.5)*20;
-      const y=(e.clientY/window.innerHeight-.5)*20;
-      orb1.style.transform=`translate3d(${x}px,${y}px,0)`;
-      orb2.style.transform=`translate3d(${-x}px,${-y}px,0)`;
+  /* ---------- CURSOR GLOW + TRAIL ---------- */
+  const cursorGlow = $('#cursorGlow');
+  const trail = [];
+  const TRAIL_N = 8;
+  let mouse = {x:-100,y:-100};
+  if(canHover && !reduceMotion){
+    for(let i=0;i<TRAIL_N;i++){
+      const t=document.createElement('div'); t.className='cursor-trail';
+      document.body.appendChild(t); trail.push({el:t,x:-100,y:-100});
+    }
+    window.addEventListener('mousemove', e=>{
+      mouse.x=e.clientX; mouse.y=e.clientY;
+      cursorGlow.style.opacity='1';
+      cursorGlow.style.transform='translate('+e.clientX+'px,'+e.clientY+'px) translate(-50%,-50%)';
     });
+    window.addEventListener('mouseleave', ()=> cursorGlow.style.opacity='0');
+  }
+  function drawCursorTrail(){
+    if(!trail.length) return;
+    let px=mouse.x, py=mouse.y;
+    for(const t of trail){
+      t.x += (px - t.x)*0.35; t.y += (py - t.y)*0.35;
+      t.el.style.transform='translate('+t.x+'px,'+t.y+'px) translate(-50%,-50%)';
+      t.el.style.opacity = (0.5 * (trail.indexOf(t)+1)/TRAIL_N).toFixed(2);
+      px=t.x; py=t.y;
+    }
   }
 
-  /* ---------- 2D Character ---------- */
-  const char = {
-    el:character,
-    x: -80,
-    y: 0,
-    dir: 1,
-    speed: baseSpeed,
-    state: 'walking',
-    stateUntil: 0,
-    mode: 'walk', // walk | swim | hot
-    width: isMobile?45:60
-  };
-  function setCharMode(theme, speedMod){
-    // Clear all mode classes
-    character.classList.remove('char-walking','char-swimming','char-hot','char-idle','grass-speed','hot-speed');
-    let mode = 'walk';
-    let yOffset = 0;
-    if(theme === 'blue'){
-      mode = 'swim';
-      yOffset = -25; // half in water
-      character.classList.add('char-swimming');
-    } else if(theme === 'red' || theme === 'orange'){
-      mode = 'hot';
-      yOffset = 0;
-      character.classList.add('char-walking','char-hot','hot-speed');
-    } else if(theme === 'green'){
-      mode = 'walk';
-      yOffset = 0;
-      character.classList.add('char-walking','grass-speed');
-    } else {
-      // bw normal
-      mode = 'walk';
-      yOffset = 0;
-      character.classList.add('char-walking');
-    }
-    char.mode = mode;
-    char.y = yOffset;
-    char.speed = baseSpeed * speedMod;
-  }
-  function updateCharState(){
-    const vw = window.innerWidth;
-    const now = performance.now();
-    if(char.state==='walking'){
-      char.x += char.speed * char.dir;
-      if(!character.classList.contains('char-walking') && char.mode !== 'swim'){
-        character.classList.add('char-walking');
-      }
-      character.classList.remove('char-idle');
-      // Edge reached
-      const stopPoint = vw - char.width - 10;
-      if(char.dir===1 && char.x >= stopPoint){
-        char.x = stopPoint;
-        char.state='idle';
-        char.stateUntil = now + 1200 + Math.random()*1200;
-        turnChar(-1);
-      } else if(char.dir===-1 && char.x <= 10){
-        char.x = 10;
-        char.state='idle';
-        char.stateUntil = now + 1200 + Math.random()*1200;
-        turnChar(1);
-      }
-    } else {
-      character.classList.remove('char-walking');
-      character.classList.add('char-idle');
-      if(now>char.stateUntil) char.state='walking';
-    }
-    // Direction flip
-    const svg = $('#charSvg');
-    svg.style.transform = char.dir===-1 ? 'scaleX(-1)' : 'scaleX(1)';
-    character.style.transform = `translate3d(${char.x}px,${char.y}px,0)`;
-    requestAnimationFrame(updateCharState);
-  }
-  function turnChar(dir){
-    char.dir=dir;
-    character.classList.add('char-blinking');
-    setTimeout(()=>character.classList.remove('char-blinking'),180);
-  }
-  function randomBlink(){
-    if(!character.classList.contains('char-blinking')){
-      character.classList.add('char-blinking');
-      setTimeout(()=>character.classList.remove('char-blinking'),150);
-    }
-    setTimeout(randomBlink,2000+Math.random()*4000);
-  }
-  // Character click
-  character.addEventListener('click', e=>{
-    e.stopPropagation();
-    const theme = body.getAttribute('data-theme')||'bw';
-    const msgs = CHAR_MOODS[theme]?.greetings || ['Hey!'];
-    charBubble.textContent = msgs[Math.floor(Math.random()*msgs.length)];
-    charBubble.classList.add('show');
-    // Jump animation
-    character.animate([
-      {transform:`translate3d(${char.x}px,${char.y}px,0)`},
-      {transform:`translate3d(${char.x}px,${char.y-15}px,0)`},
-      {transform:`translate3d(${char.x}px,${char.y}px,0)`}
-    ],{duration:500,easing:'cubic-bezier(.22,1,.36,1)'});
-    createRipple(e.clientX||(char.x+30), e.clientY||(window.innerHeight-40));
-    clearTimeout(character._bubbleTO);
-    character._bubbleTO = setTimeout(()=>charBubble.classList.remove('show'),2000);
-  });
+  /* ---------- NAV / MENU / BUTTONS ---------- */
+  const hamburger = $('#hamburger');
+  hamburger.addEventListener('click', ()=> document.body.classList.toggle('menu-open'));
+  $$('[data-link]').forEach(a=>a.addEventListener('click', ()=>document.body.classList.remove('menu-open')));
 
-  /* ---------- Smooth Scroll ---------- */
-  $$('a[href^="#"]').forEach(a=>{
-    a.addEventListener('click',e=>{
-      const id = a.getAttribute('href');
-      if(id.length<=1) return;
-      const tgt = document.querySelector(id);
-      if(!tgt) return;
-      e.preventDefault();
-      const y = tgt.getBoundingClientRect().top + window.scrollY - 40;
-      window.scrollTo({top:y,behavior:'smooth'});
+  // theme dots (dock + mobile menu)
+  $$('.theme-dot').forEach(dot=>{
+    dot.addEventListener('click', ()=>{
+      document.body.classList.remove('menu-open');
+      setTheme(dot.dataset.theme);
     });
   });
 
-  /* ---------- Resize ---------- */
-  let resizeTO;
-  window.addEventListener('resize',()=>{
-    clearTimeout(resizeTO);
-    resizeTO = setTimeout(()=>{
-      resizeCanvas();
-      // rebuild scene for new mobile/desktop size
-      applyTheme(body.getAttribute('data-theme'));
-    },150);
+  // language toggle (EN / ID)
+  $('#langToggle').addEventListener('click', ()=> setLang(LANG==='en' ? 'id' : 'en'));
+
+  // magnetic + ripple + scroll buttons
+  $$('[data-scroll]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const t = $(btn.dataset.scroll);
+      if(t) t.scrollIntoView({behavior: reduceMotion?'auto':'smooth'});
+    });
+  });
+  if(canHover && !reduceMotion){
+    $$('.btn, .theme-dot').forEach(el=>{
+      el.addEventListener('mousemove', e=>{
+        const r=el.getBoundingClientRect();
+        const mx=e.clientX-r.left-r.width/2, my=e.clientY-r.top-r.height/2;
+        el.style.transform='translate('+(mx*0.25)+'px,'+(my*0.35)+'px)';
+      });
+      el.addEventListener('mouseleave', ()=>{ el.style.transform=''; });
+    });
+  }
+  // ripple on any .btn click
+  $$('.btn').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const r=btn.getBoundingClientRect();
+      const s=document.createElement('span'); s.className='ripple';
+      const size=Math.max(r.width,r.height);
+      s.style.width=s.style.height=size+'px';
+      s.style.left=(e.clientX-r.left-size/2)+'px';
+      s.style.top=(e.clientY-r.top-size/2)+'px';
+      btn.appendChild(s); setTimeout(()=>s.remove(),600);
+    });
   });
 
-  /* ---------- Init ---------- */
-  function init(){
-    renderWorld();
-    initTheme();
-    observeReveals();
-    $$('[data-count]').forEach(el=>countIO.observe(el));
-    hideLoader();
-    if(!prefersReducedMotion){
-      initParticles();
-      drawParticles();
-    }else particlesCanvas.style.display='none';
-    parallaxOrbs();
-    typeWriter($('#typingSub'), typingPhrases);
-    $('#typingTarget').textContent = '14 YEARS OLD STUDENT';
-    setTimeout(()=>{
-      updateCharState();
-      randomBlink();
-    },2200);
+  // card tap (mobile)
+  $$('.card').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      c.classList.add('tap');
+      setTimeout(()=>c.classList.remove('tap'), 600);
+    });
+  });
+
+  /* ---------- SCROLL: progress + reveal + count-up ---------- */
+  const progress = $('#progress');
+  function onScroll(){
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h>0 ? (window.scrollY/h*100) : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        en.target.classList.add('in');
+        const counter = en.target.querySelector('[data-count]');
+        if(counter) countUp(counter);
+        io.unobserve(en.target);
+      }
+    });
+  }, {threshold:0.2});
+  $$('.reveal').forEach(el=>io.observe(el));
+
+  function countUp(el){
+    const target = parseFloat(el.dataset.count);
+    if(isNaN(target)) return;
+    const dur = reduceMotion ? 0 : 1100;
+    const t0 = performance.now();
+    function tick(t){
+      const k = dur? clamp((t-t0)/dur,0,1) : 1;
+      const e = 1-Math.pow(1-k,3);
+      el.textContent = Math.round(target*e);
+      if(k<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
   }
 
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',init);
-  }else init();
+  /* ---------- RESIZE ---------- */
+  window.addEventListener('resize', ()=>{ sizeCanvas(); initParticles(); measure(); });
+
+  /* ---------- LOADER / BOOT ---------- */
+  function boot(){
+    sizeCanvas(); initParticles(); measure(); updateParticleColor();
+    setLang(LANG);                        // restore saved language + highlight toggle
+    setTheme(startTheme, {save:true});    // restore saved world
+    requestAnimationFrame(loop);
+    // animate loader dots
+    let d=0; const ld=$('#loadDots');
+    const dotInt=setInterval(()=>{ d=(d+1)%4; ld.textContent='.'.repeat(d||1)+'.'.repeat(3-d).slice(0,3); }, 350);
+    const reveal = ()=>{
+      clearInterval(dotInt);
+      $('#loader').classList.add('hide');
+      document.body.classList.add('loaded');
+    };
+    const delay = reduceMotion ? 350 : 750;
+    // reveal as soon as possible (DOM is already parsed at this point)
+    setTimeout(reveal, delay);
+    // safety: never trap the user, even if something stalls
+    setTimeout(reveal, 2500);
+  }
+
+  // tiny canvas draw tied into rAF via its own loop (lightweight)
+  (function pLoop(){ drawParticles(); requestAnimationFrame(pLoop); })();
+
+  boot();
 })();
+
+(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a21b8badb9eece2b',t:'MTc4NTE1NDI3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
