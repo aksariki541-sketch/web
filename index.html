@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RIKI AKSA — Personal Digital Universe</title>
+<meta name="description" content="Riki Aksa — 14 years old student building ideas in the digital world." />
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body data-theme="bw">
+
+<!-- Scroll progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-logo">RIKI AKSA</div>
+  <div class="loader-bar"></div>
+  <div class="loader-text">Initializing universe...</div>
+</div>
+
+<!-- Background -->
+<div class="bg-grid"></div>
+<div class="bg-orb orb1" id="orb1"></div>
+<div class="bg-orb orb2" id="orb2"></div>
+<canvas id="particles-canvas"></canvas>
+
+<!-- Dynamic Scene (bottom ground, changes per theme) -->
+<div class="scene" id="scene"></div>
+
+<!-- Navigation -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    <span>RIKI.AKSA</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#world">World</a>
+      <a href="#school">School</a>
+    </div>
+    <!-- Theme switcher: always visible next to menu/hamburger -->
+    <div class="theme-switcher" id="themeSwitcher">
+      <button class="theme-orb bw active" data-theme="bw" aria-label="Black White"></button>
+      <button class="theme-orb green" data-theme="green" aria-label="Green"></button>
+      <button class="theme-orb blue" data-theme="blue" aria-label="Blue"></button>
+      <button class="theme-orb red" data-theme="red" aria-label="Red"></button>
+      <button class="theme-orb orange" data-theme="orange" aria-label="Orange"></button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home" class="mobile-link">Home</a>
+  <a href="#about" class="mobile-link">About</a>
+  <a href="#world" class="mobile-link">World</a>
+  <a href="#school" class="mobile-link">School</a>
+</div>
+
+<main>
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="home">
+    <div class="hero-badges">
+      <span class="badge"><span class="dot"></span>14 Years Old</span>
+      <span class="badge">SMP 4 Sigi</span>
+      <span class="badge">Digital Creator</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="line"><span>HELLO, I'M</span></span>
+      <span class="line"><span>RIKI AKSA</span></span>
+      <span class="line"><span id="typingTarget"></span></span>
+    </h1>
+    <p class="hero-sub">
+      Exploring code, design, technology, and digital creativity.
+      <span class="typing" id="typingSub"></span>
+    </p>
+    <div class="hero-ctas">
+      <a href="#world" class="btn primary magnetic" data-magnetic>
+        Explore My World
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+      <a href="#about" class="btn magnetic" data-magnetic>About Me</a>
+    </div>
+
+    <div class="float-card fc1"><span class="dot"></span> Online now</div>
+    <div class="float-card fc2"><span class="dot" style="background:#4ade80;box-shadow:0 0 8px #4ade80"></span> &lt;/&gt; coding...</div>
+    <div class="float-card fc3"><span class="dot"></span> Sigi, Indonesia</div>
+
+    <div class="hero-meta">
+      <span>Personal Digital Universe</span>
+      <span class="scroll-ind"><span class="scroll-line"></span> Scroll</span>
+    </div>
+  </section>
+
+  <!-- ========== ABOUT ========== -->
+  <section id="about">
+    <div class="section-label reveal">About Me</div>
+    <h2 class="section-title reveal">A kid with big ideas<br/>in a digital world.</h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>Hi, I'm <strong>Riki Aksa</strong>.</p>
+        <p>A <span class="accent-text">14-year-old student</span> from SMP Negeri 4 Sigi who enjoys exploring <strong>technology, coding, design</strong>, and all kinds of digital experiments.</p>
+        <p>I spend my time learning how things work on the internet — building small websites, playing with code, trying out AI tools, and turning random ideas into something I can see on screen.</p>
+        <p>This is my little corner of the internet. <span class="accent-text">Welcome to my universe.</span></p>
+      </div>
+      <div class="about-stats">
+        <div class="stat-card reveal">
+          <div class="stat-num" data-count="14">0</div>
+          <div class="stat-label">Years Old</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-num">SMP 4</div>
+          <div class="stat-label">Sigi</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-num" data-count="100">0</div>
+          <div class="stat-label">% Curious</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Ideas</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== MY DIGITAL WORLD ========== -->
+  <section id="world">
+    <div class="section-label reveal">My Digital World</div>
+    <h2 class="section-title reveal">Things I love<br/>to explore.</h2>
+    <div class="world-grid" id="worldGrid"></div>
+  </section>
+
+  <!-- ========== SCHOOL ========== -->
+  <section class="tight" id="school">
+    <div class="school reveal">
+      <svg class="school-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M10 21v-6h4v6"/>
+        <rect x="9" y="10" width="2" height="2" fill="currentColor"/><rect x="13" y="10" width="2" height="2" fill="currentColor"/>
+      </svg>
+      <div class="school-label">My School</div>
+      <h3>SMP Negeri 4 Sigi</h3>
+      <p>One of the places that is part of my journey.</p>
+      <a href="https://smpnegeri4sigi.my.id" target="_blank" rel="noopener noreferrer" class="btn primary magnetic external" data-magnetic>
+        Visit School Website
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>© 2026 Riki Aksa · Built with
+    <svg class="heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+     in Sigi, Sulawesi Tengah
+  </div>
+</footer>
+
+<!-- 2D Character -->
+<div class="character" id="character">
+  <div class="char-aura"></div>
+  <div class="char-bubble" id="charBubble">Hey!</div>
+  <svg class="char-svg" viewBox="0 0 60 80" id="charSvg" color="currentColor">
+    <g class="char-body-group">
+      <!-- Water bubbles (swim mode) -->
+      <g class="char-bubbles">
+        <circle class="char-bubble-small" cx="38" cy="30" r="2" fill="currentColor" opacity=".6"/>
+        <circle class="char-bubble-small" cx="42" cy="24" r="1.5" fill="currentColor" opacity=".5" style="animation-delay:.5s"/>
+        <circle class="char-bubble-small" cx="35" cy="20" r="1" fill="currentColor" opacity=".4" style="animation-delay:1s"/>
+      </g>
+      <!-- Sweat drop (hot mode) -->
+      <g class="char-sweat">
+        <path d="M46 16 Q48 20 46 22 Q44 20 46 16Z" fill="#60a5fa"/>
+      </g>
+      <!-- Legs -->
+      <g class="char-leg-l" style="transform-origin:25px 58px">
+        <rect x="22" y="58" width="6" height="18" rx="3" fill="currentColor"/>
+      </g>
+      <g class="char-leg-r" style="transform-origin:35px 58px">
+        <rect x="32" y="58" width="6" height="18" rx="3" fill="currentColor"/>
+      </g>
+      <!-- Body -->
+      <rect x="18" y="36" width="24" height="26" rx="8" fill="currentColor"/>
+      <!-- Arms -->
+      <g class="char-arm-l" style="transform-origin:20px 40px">
+        <rect x="13" y="38" width="6" height="18" rx="3" fill="currentColor"/>
+      </g>
+      <g class="char-arm-r" style="transform-origin:40px 40px">
+        <rect x="41" y="38" width="6" height="18" rx="3" fill="currentColor"/>
+      </g>
+      <!-- Head -->
+      <g>
+        <circle cx="30" cy="22" r="16" fill="#fef3c7"/>
+        <!-- Hair -->
+        <path d="M14 20 Q16 8 30 6 Q44 8 46 20 Q44 14 38 12 Q34 16 30 14 Q26 16 22 12 Q16 14 14 20Z" fill="currentColor"/>
+        <!-- Eyes -->
+        <g class="char-eye-l"><circle cx="25" cy="22" r="2.2" fill="#111"/></g>
+        <g class="char-eye-r"><circle cx="35" cy="22" r="2.2" fill="#111"/></g>
+        <!-- Mouth (dynamic per mood) -->
+        <path class="char-mouth" d="M26 28 Q30 31 34 28" stroke="#111" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <!-- Cheeks -->
+        <circle cx="21" cy="26" r="2" fill="#fca5a5" opacity=".5"/>
+        <circle cx="39" cy="26" r="2" fill="#fca5a5" opacity=".5"/>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
