@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#050505" />
-<title>RIKI AKSA </title>
+<title>RIKI AKSA — Digital Universe</title>
 <meta name="description" content="Welcome to the personal digital universe of Riki Aksa, 14 years old student from SMP Negeri 4 Sigi." />
   <link rel="stylesheet" href="style.css">
 
@@ -29,6 +29,10 @@
     <a href="#school" data-i18n="nav.school">School</a>
   </nav>
   <div class="nav-controls">
+    <div class="status-pill">
+      <span class="dot"></span>
+      <span data-i18n="nav.status">ONLINE • EXPLORING</span>
+    </div>
     <button class="lang-toggle" id="langToggle" aria-label="Ganti bahasa / Change language">
       <span data-lang="en">EN</span><i>/</i><span data-lang="id">ID</span>
     </button>
@@ -37,6 +41,7 @@
       <button class="theme-dot" data-theme="green"  id="theme-green"  aria-label="Green"><span class="tip" data-i18n="tip.green">Green</span></button>
       <button class="theme-dot" data-theme="blue"   id="theme-blue"   aria-label="Blue"><span class="tip" data-i18n="tip.blue">Blue</span></button>
       <button class="theme-dot" data-theme="red"    id="theme-red"    aria-label="Red"><span class="tip" data-i18n="tip.red">Red</span></button>
+      <button class="theme-dot" data-theme="violet" id="theme-violet" aria-label="Violet"><span class="tip" data-i18n="tip.violet">Violet</span></button>
     </div>
     <button class="hamburger" id="hamburger" aria-label="Menu"><span></span></button>
   </div>
@@ -66,11 +71,41 @@
   </div>
   <div class="scroll-hint" data-i18n="hero.scroll">SCROLL</div>
 </section>
-<section id="projects"><h2>Projects</h2><ul>
-<li><a href="https://rikixmiku.vercel.app" target="_blank">rikixmiku.vercel.app</a></li>
-<li><a href="https://rikixxx.vercel.app/" target="_blank">rikixxx.vercel.app</a></li>
-<li><a href="https://rikiofc.vercel.app" target="_blank">rikiofc.vercel.app</a></li>
-</ul></section>
+<section id="projects">
+  <div class="wrap">
+    <p class="eyebrow reveal" data-i18n="projects.eyebrow">LIVE CREATIONS</p>
+    <h2 class="sec-title reveal" style="--d:.05s" data-i18n="projects.heading">Things I've <span class="accent">shipped</span></h2>
+    <div class="proj-grid">
+      <a class="proj-card reveal" href="https://rikixmiku.vercel.app" target="_blank" style="--d:.1s">
+        <div class="proj-header">
+          <span class="proj-tag">LIVE</span>
+          <div class="proj-ico">🎤</div>
+        </div>
+        <h4>RikiXMiku</h4>
+        <p data-i18n="proj.miku">Interactive Hatsune Miku experience with AI voice &amp; visuals.</p>
+        <div class="proj-meta">vercel.app • 2025</div>
+      </a>
+      <a class="proj-card reveal" href="https://rikixxx.vercel.app/" target="_blank" style="--d:.18s">
+        <div class="proj-header">
+          <span class="proj-tag">EXPERIMENT</span>
+          <div class="proj-ico">🌀</div>
+        </div>
+        <h4>RikiXXX</h4>
+        <p data-i18n="proj.xxx">Generative art playground built with shaders and WebGL.</p>
+        <div class="proj-meta">vercel.app • 2025</div>
+      </a>
+      <a class="proj-card reveal" href="https://rikiofc.vercel.app" target="_blank" style="--d:.26s">
+        <div class="proj-header">
+          <span class="proj-tag">LIVE</span>
+          <div class="proj-ico">🤖</div>
+        </div>
+        <h4>RikiOFC</h4>
+        <p data-i18n="proj.ofc">Personal AI assistant and chat interface built from scratch.</p>
+        <div class="proj-meta">vercel.app • 2025</div>
+      </a>
+    </div>
+  </div>
+</section>
 
 
 <!-- ABOUT -->
@@ -155,7 +190,7 @@
 </footer>
 
 <!-- STAGE: environment + living character -->
-<div class="stage" id="stage">
+  <div class="stage" id="stage">
   <div class="env env-grass" id="envGrass"><div class="grass-blades" id="grassBlades"></div></div>
   <div class="env env-water" id="envWater">
     <div class="water-body"></div>
@@ -165,6 +200,7 @@
     </svg>
   </div>
   <div class="env env-heat" id="envHeat"><div class="heat-sun"></div></div>
+  <div class="env env-violet" id="envViolet"><div class="cosmic-stars" id="cosmicStars"></div></div>
 
   <div class="character idle expr-cool" id="character">
     <div class="char-y" id="charY">
