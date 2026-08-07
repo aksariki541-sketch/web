@@ -553,3 +553,4 @@ body.reduce *{animation-duration:.001ms!important;animation-iteration-count:1!im
 body.reduce .limb{animation:none!important}
 body.reduce .grid-bg,.hero-orb{animation:none!important}
 body.reduce .reveal{opacity:1!important;transform:none!important}
+/* Deploy trigger: Fri Aug  7 10:36:13 UTC 2026 */
