@@ -42,9 +42,14 @@
       'school.eyebrow':'PART OF THE JOURNEY',
       'school.text':'One of the places that is part of my journey. A small piece of where this digital universe began.',
       'school.btn':'VISIT SCHOOL WEBSITE',
+      'projects.eyebrow':'LIVE CREATIONS',
+      'projects.heading':'Things I\'ve <span class="accent">shipped</span>',
+      'proj.miku':'Interactive Hatsune Miku experience with AI voice & visuals.',
+      'proj.xxx':'Generative art playground built with shaders and WebGL.',
+      'proj.ofc':'Personal AI assistant and chat interface built from scratch.',
       'footer.text':'Built with curiosity by <b>Riki Aksa</b> · SMP Negeri 4 Sigi · Sigi, Sulawesi Tengah, Indonesia',
       'loader.init':'INITIALIZING DIGITAL UNIVERSE',
-      'tip.mono':'Mono','tip.green':'Green','tip.blue':'Blue','tip.red':'Red'
+      'tip.mono':'Mono','tip.green':'Green','tip.blue':'Blue','tip.red':'Red','tip.violet':'Violet'
     },
     id:{
       'nav.home':'Beranda','nav.about':'Tentang','nav.world':'Dunia','nav.school':'Sekolah',
@@ -69,9 +74,14 @@
       'school.eyebrow':'BAGIAN DARI PERJALANAN',
       'school.text':'Salah satu tempat yang menjadi bagian perjalanan saya. Sepenggal kecil awal mula alam semesta digital ini.',
       'school.btn':'KUNJUNGI WEBSITE SEKOLAH',
+      'projects.eyebrow':'KREASI LIVE',
+      'projects.heading':'Hal yang sudah saya <span class="accent">launch</span>',
+      'proj.miku':'Pengalaman Hatsune Miku interaktif dengan AI voice & visuals.',
+      'proj.xxx':'Playground generative art dengan shader dan WebGL.',
+      'proj.ofc':'Personal AI assistant & chat interface yang dibuat dari nol.',
       'footer.text':'Dibuat dengan rasa ingin tahu oleh <b>Riki Aksa</b> · SMP Negeri 4 Sigi · Sigi, Sulawesi Tengah, Indonesia',
       'loader.init':'MENGINISIALISASI ALAM SEMESTA DIGITAL',
-      'tip.mono':'Mono','tip.green':'Hijau','tip.blue':'Biru','tip.red':'Merah'
+      'tip.mono':'Mono','tip.green':'Hijau','tip.blue':'Biru','tip.red':'Merah','tip.violet':'Ungu'
     }
   };
   const BUBBLES = {
@@ -80,13 +90,15 @@
          blue:["Just keep swimming.","Water mode activated.","Relax...","So cool."],
          hot:["Too hot...","Need water!","Where is the water?!","Ahh, it burns!"],
          relief:["Ahh... cool!","Finally!","Much better!"],
-         swim:["Much better!","Just keep swimming.","Cool!"] },
+         swim:["Much better!","Just keep swimming.","Cool!"],
+         violet:["Cosmic vibes...","Stellar!","Feels magical.","Galaxy mode!"] },
     id:{ click:["Hai!","Selamat datang!","Ayo jelajahi!","Senang bertemu!","Keren!","Tetap penasaran!"],
          green:["Cuaca bagus!","Nikmati rumputnya!","Terasa damai.","Mode rumput!"],
          blue:["Terus berenang.","Mode air aktif.","Santai...","Sejuk sekali."],
          hot:["Panas banget...","Butuh air!","Di mana airnya?!","Aduh, panas!"],
          relief:["Ahh... sejuk!","Akhirnya!","Jauh lebih baik!"],
-         swim:["Jauh lebih baik!","Terus berenang.","Keren!"] }
+         swim:["Jauh lebih baik!","Terus berenang.","Keren!"],
+         violet:["Vibes kosmik...","Bintang!","Terasa ajaib.","Mode galaksi!"] }
   };
   function B(key){ return pick(BUBBLES[LANG][key]); }
   function setLang(lang){
@@ -101,7 +113,7 @@
   }
 
   /* ---------- THEME SYSTEM (worlds) ---------- */
-  const THEMES = ['mono','green','blue','red'];
+  const THEMES = ['mono','green','blue','red','violet'];
   let THEME_TOKEN = 0;            // bumped on every theme change (cancels scripts)
   const saved = localStorage.getItem('ra-theme');
   const startTheme = THEMES.includes(saved) ? saved : 'mono';
@@ -129,6 +141,7 @@
     else if(name==='green'){ setMode('green'); setExpr('happy'); }
     else if(name==='blue'){ setMode('swim'); setExpr('relief'); }
     else if(name==='red'){ startHotStory(); }
+    else if(name==='violet'){ setMode('look'); setExpr('happy'); }
   }
 
   /* ---------- CHARACTER STATE MACHINE ---------- */
@@ -342,6 +355,8 @@
     envGrass.querySelectorAll('.leaf').forEach(e=>e.remove());
     envWater.querySelectorAll('.water-bubble').forEach(e=>e.remove());
     envHeat.querySelectorAll('.ember').forEach(e=>e.remove());
+    const envViolet = $('#envViolet');
+    if(envViolet) envViolet.querySelectorAll('.star-shoot').forEach(e=>e.remove());
     if(reduceMotion) return;
     const base = isTouch ? 10 : 22;
     if(name==='green'){
@@ -362,6 +377,8 @@
       for(let i=0;i<base;i++) spawnWaterBubble();
     } else if(name==='red'){
       for(let i=0;i<base;i++) spawnEmber();
+    } else if(name==='violet'){
+      for(let i=0;i<base+8;i++) spawnShootingStar();
     }
   }
   function spawnLeaf(){
@@ -391,6 +408,17 @@
     e.style.animationDelay = rand(0,4)+'s';
     envHeat.appendChild(e);
     setTimeout(()=>e.remove(), 8000);
+  }
+
+  function spawnShootingStar(){
+    const s = document.createElement('div');
+    s.className = 'star-shoot';
+    s.style.left = rand(5,95)+'%';
+    s.style.top = rand(0,65)+'%';
+    s.style.animationDuration = rand(0.6, 1.6)+'s';
+    s.style.animationDelay = rand(0, 6)+'s';
+    $('#envViolet').appendChild(s);
+    setTimeout(()=>s.remove(), 2600);
   }
 
   /* ---------- AMBIENT PARTICLE CANVAS ---------- */
@@ -506,6 +534,25 @@
     c.addEventListener('click', ()=>{
       c.classList.add('tap');
       setTimeout(()=>c.classList.remove('tap'), 600);
+    });
+  });
+
+  // SUPER COOL: project card clicks = cosmic sparks
+  $$('.proj-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(reduceMotion) return;
+      for(let i=0; i<13; i++){
+        const s = document.createElement('div');
+        s.style.cssText = `position:absolute;width:4px;height:4px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:9;`;
+        s.style.left = (e.offsetX + (Math.random()-0.5)*26) + 'px';
+        s.style.top  = (e.offsetY + (Math.random()-0.5)*26) + 'px';
+        card.appendChild(s);
+        const dur = 380 + Math.random()*420;
+        s.animate([
+          {transform:'translateY(0) scale(1)', opacity:1},
+          {transform:`translateY(${40+Math.random()*38}px) scale(0)`, opacity:0}
+        ], {duration:dur, easing:'ease-out'}).onfinish = ()=> s.remove();
+      }
     });
   });
 
